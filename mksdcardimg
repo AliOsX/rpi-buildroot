@@ -1,0 +1,60 @@
+#!/bin/bash
+IMAGE="sdimg.img"
+FDISK=`which fdisk`
+KPARTX=`which kpartx`
+MKFS_EXT4=`which mkfs.ext4`
+MKFS_VFAT=`which mkfs.vfat`
+TAR=`which tar`
+CP=`which cp`
+DD=`which dd`
+MOUNT=`which mount`
+UMOUNT=`which umount`
+
+
+${DD} if=/dev/zero of=${IMAGE} bs=1M count=64  > /dev/null
+
+# partition image
+${FDISK} ${IMAGE} <<END
+o
+n
+p
+1
+
++32M
+n
+p
+2
+
+
+t
+1
+e
+a
+1
+w
+END
+
+kpartx -a ${IMAGE} > /dev/null
+BOOTLOOP=/dev/mapper/`kpartx -al sdimg.img | awk 'NR==1 {print $1}'`
+ROOTLOOP=/dev/mapper/`kpartx -al sdimg.img | awk 'NR==2 {print $1}'`
+
+echo "Bootloop: ${BOOTLOOP}"
+echo "Rootloop: ${ROOTLOOP}"
+mkdir sdimage
+mkdir sdimage/root
+mkdir sdimage/boot
+mkfs.vfat -F16 -n BOOT ${BOOTLOOP} > /dev/null
+mkfs.ext4 ${ROOTLOOP} > /dev/null
+
+mount -t vfat -o rw ${BOOTLOOP} sdimage/boot > /dev/null
+mount -t ext4 -o rw ${ROOTLOOP} sdimage/root > /dev/null
+
+cp output/images/boot/* sdimage/boot/
+cd sdimage/root
+tar xf ../../output/images/rootfs.tar
+cd ../..
+sync && sync
+umount sdimage/boot
+umount sdimage/root
+sudo kpartx -d ${BOOTLOOP}
+sudo kpartx -d ${ROOTLOOP}
