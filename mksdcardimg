@@ -13,7 +13,7 @@ UMOUNT=`which umount`
 if [ -d $IMAGE ]; then
 	rm ${IMAGE}
 fi
-${DD} if=/dev/zero of=${IMAGE} bs=96M count=1 > /dev/null 2>&1
+${DD} if=/dev/zero of=${IMAGE} bs=128M count=1 > /dev/null 2>&1
 
 # partition image
 ${FDISK} ${IMAGE} > /dev/null 2>&1 <<-"END" 
@@ -27,7 +27,11 @@ ${FDISK} ${IMAGE} > /dev/null 2>&1 <<-"END"
 	p
 	2
 	
+	+64M
+	n
+	p
 	
+
 	t
 	1
 	e
@@ -36,29 +40,34 @@ ${FDISK} ${IMAGE} > /dev/null 2>&1 <<-"END"
 	w
 END
 
-sudo ${KPARTX} -a ${IMAGE}
-LOOP=`sudo ${KPARTX} -al ${IMAGE} | awk 'NR==1 {print substr($1,0,5)}'`
-BOOTLOOP=/dev/mapper/${LOOP}p1
-ROOTLOOP=/dev/mapper/${LOOP}p2
-
-# echo "Bootloop: ${BOOTLOOP}"
-# echo "Rootloop: ${ROOTLOOP}"
-if [ -d 'sdimage' ]; then
-	sudo rm -Rf sdimage
-fi
-mkdir sdimage
-mkdir -p sdimage/root
-mkdir -p sdimage/boot
-sudo ${MKFS_VFAT} -F16 -n BOOT -S 512 ${BOOTLOOP} > /dev/null 2>&1
-sudo ${MKFS_EXT4} ${ROOTLOOP} > /dev/null 2>&1
-
-sudo ${MOUNT} -t vfat -w ${BOOTLOOP} sdimage/boot
-sudo ${MOUNT} -t ext4 -w ${ROOTLOOP} sdimage/root
-
-sudo ${CP} output/images/boot/* sdimage/boot/ > /dev/null 2>&1
-sudo ${TAR} xvpsf output/images/rootfs.tar -C sdimage/root > /dev/null 2>&1
-sync && sync > /dev/null 2>&1
-sudo ${UMOUNT} sdimage/boot
-sudo ${UMOUNT} sdimage/root
-sudo ${KPARTX} -d ${IMAGE} > /dev/null 2>&1
-echo "Complete!"
+#sudo ${KPARTX} -a ${IMAGE}
+#LOOP=`sudo ${KPARTX} -al ${IMAGE} | awk 'NR==1 {print substr($1,0,5)}'`
+#BOOTLOOP=/dev/mapper/${LOOP}p1
+#ROOTLOOP=/dev/mapper/${LOOP}p2
+#APPSLOOP=/dev/mapper/${LOOP}p3
+#
+## echo "Bootloop: ${BOOTLOOP}"
+## echo "Rootloop: ${ROOTLOOP}"
+#if [ -d 'sdimage' ]; then
+#	sudo rm -Rf sdimage
+#fi
+#mkdir sdimage
+#mkdir -p sdimage/root
+#mkdir -p sdimage/boot
+#mkdir -p sdimage/apps
+#sudo ${MKFS_VFAT} -F16 -n BOOT -S 512 ${BOOTLOOP} > /dev/null 2>&1
+#sudo ${MKFS_EXT4} ${ROOTLOOP} > /dev/null 2>&1
+#sudo ${MKFS_EXT4} ${APPSLOOP} > /dev/null 2>&1
+#
+#sudo ${MOUNT} -t vfat -w ${BOOTLOOP} sdimage/boot
+#sudo ${MOUNT} -t ext4 -w ${ROOTLOOP} sdimage/root
+#sudo ${MOUNT} -t ext4 -w ${APPSLOOP} sdimage/apps
+#
+#sudo ${CP} output/images/boot/* sdimage/boot/ > /dev/null 2>&1
+#sudo ${TAR} xvpsf output/images/rootfs.tar -C sdimage/root > /dev/null 2>&1
+#sync && sync > /dev/null 2>&1
+#sudo ${UMOUNT} sdimage/boot
+#sudo ${UMOUNT} sdimage/root
+#sudo ${UMOUNT} sdimage/apps
+#sudo ${KPARTX} -d ${IMAGE} > /dev/null 2>&1
+#echo "Complete!"
