@@ -8,10 +8,16 @@ Building
 	make nconfig         # if you want to add packages or fiddle around with it
 	make                 # build (NOTICE: Don't use the **-j** switch, it's set to auto-detect)
 
-Create SD Card IMG
----------
-	sudo ./mksdcardimg
 
+Add Startup Scripts to the System
+---------------------------------
+Startup scripts/apps belong in the {buildroot}/stak-files/modes directory and will get copied
+to the sd card image in the next step.
+
+
+Create SD Card IMG
+------------------
+	sudo ./mksdcardimg
 
 
 

@@ -13,6 +13,11 @@ UMOUNT=`which umount`
 if [ -d $IMAGE ]; then
 	rm ${IMAGE}
 fi
+
+if [ -d ${IMAGE}.bz2 ]; then
+	rm -f ${IMAGE}.bz2
+fi
+
 ${DD} if=/dev/zero of=${IMAGE} bs=128M count=1 > /dev/null 2>&1
 
 # partition image
@@ -30,7 +35,8 @@ ${FDISK} ${IMAGE} > /dev/null 2>&1 <<-"END"
 	+64M
 	n
 	p
-	
+	3
+
 
 	t
 	1
@@ -40,34 +46,43 @@ ${FDISK} ${IMAGE} > /dev/null 2>&1 <<-"END"
 	w
 END
 
-#sudo ${KPARTX} -a ${IMAGE}
-#LOOP=`sudo ${KPARTX} -al ${IMAGE} | awk 'NR==1 {print substr($1,0,5)}'`
-#BOOTLOOP=/dev/mapper/${LOOP}p1
-#ROOTLOOP=/dev/mapper/${LOOP}p2
-#APPSLOOP=/dev/mapper/${LOOP}p3
-#
-## echo "Bootloop: ${BOOTLOOP}"
-## echo "Rootloop: ${ROOTLOOP}"
-#if [ -d 'sdimage' ]; then
-#	sudo rm -Rf sdimage
-#fi
-#mkdir sdimage
-#mkdir -p sdimage/root
-#mkdir -p sdimage/boot
-#mkdir -p sdimage/apps
-#sudo ${MKFS_VFAT} -F16 -n BOOT -S 512 ${BOOTLOOP} > /dev/null 2>&1
-#sudo ${MKFS_EXT4} ${ROOTLOOP} > /dev/null 2>&1
-#sudo ${MKFS_EXT4} ${APPSLOOP} > /dev/null 2>&1
-#
-#sudo ${MOUNT} -t vfat -w ${BOOTLOOP} sdimage/boot
-#sudo ${MOUNT} -t ext4 -w ${ROOTLOOP} sdimage/root
-#sudo ${MOUNT} -t ext4 -w ${APPSLOOP} sdimage/apps
-#
-#sudo ${CP} output/images/boot/* sdimage/boot/ > /dev/null 2>&1
-#sudo ${TAR} xvpsf output/images/rootfs.tar -C sdimage/root > /dev/null 2>&1
-#sync && sync > /dev/null 2>&1
-#sudo ${UMOUNT} sdimage/boot
-#sudo ${UMOUNT} sdimage/root
-#sudo ${UMOUNT} sdimage/apps
-#sudo ${KPARTX} -d ${IMAGE} > /dev/null 2>&1
-#echo "Complete!"
+sudo ${KPARTX} -a ${IMAGE}
+LOOP=`sudo ${KPARTX} -al ${IMAGE} | awk 'NR==1 {print substr($1,0,5)}'`
+BOOTLOOP=/dev/mapper/${LOOP}p1
+ROOTLOOP=/dev/mapper/${LOOP}p2
+APPSLOOP=/dev/mapper/${LOOP}p3
+
+# echo "Bootloop: ${BOOTLOOP}"
+# echo "Rootloop: ${ROOTLOOP}"
+if [ -d 'sdimage' ]; then
+	sudo rm -Rf sdimage
+fi
+mkdir sdimage
+mkdir -p sdimage/root
+mkdir -p sdimage/boot
+mkdir -p sdimage/modes
+sudo ${MKFS_VFAT} -F16 -n BOOT -S 512 ${BOOTLOOP} > /dev/null 2>&1
+sudo ${MKFS_EXT4} ${ROOTLOOP} > /dev/null 2>&1
+sudo ${MKFS_EXT4} ${APPSLOOP} > /dev/null 2>&1
+
+sudo ${MOUNT} -t vfat -w ${BOOTLOOP} sdimage/boot
+sudo ${MOUNT} -t ext4 -w ${ROOTLOOP} sdimage/root
+sudo ${MOUNT} -t ext4 -w ${APPSLOOP} sdimage/modes
+
+sudo ${CP} output/images/boot/* sdimage/boot/ > /dev/null 2>&1
+sudo ${TAR} xvpsf output/images/rootfs.tar -C sdimage/root > /dev/null 2>&1
+
+# modify root file system here
+echo "/dev/mmcblk0p3		/modes	       ext4    defaults	  0	 0" >> sdimage/root/etc/fstab
+install -m 775 stak-files/S05launchscript sdimage/root/etc/init.d
+install -m 775 stak-files/modes/* sdimage/modes/
+install -d sdimage/root/modes
+
+sync && sync > /dev/null 2>&1
+sudo ${UMOUNT} sdimage/boot
+sudo ${UMOUNT} sdimage/root
+sudo ${UMOUNT} sdimage/modes
+sudo ${KPARTX} -d ${IMAGE} > /dev/null 2>&1
+sudo rm -Rf sdimage/
+# bzip2 ${IMAGE}
+echo "Complete!"
