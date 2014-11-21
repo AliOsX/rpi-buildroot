@@ -1,3 +1,8 @@
+Setup
+-----
+
+Install the required packages to build the system.
+	sudo apt-get install git build-essential ncurses-dev kpartx
 
 Building
 --------
@@ -13,6 +18,7 @@ Add Startup Scripts to the System
 ---------------------------------
 Startup scripts/apps belong in the {buildroot}/stak-files/modes directory and will get copied
 to the sd card image in the next step.
+
 
 
 Create SD Card IMG

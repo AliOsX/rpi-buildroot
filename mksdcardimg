@@ -47,7 +47,7 @@ ${FDISK} ${IMAGE} > /dev/null 2>&1 <<-"END"
 END
 
 sudo ${KPARTX} -a ${IMAGE}
-LOOP=`sudo ${KPARTX} -al ${IMAGE} | awk 'NR==1 {print substr($1,0,5)}'`
+LOOP=`sudo ${KPARTX} -al ${IMAGE} | awk 'NR==1 {print substr($1,1,5)}'`
 BOOTLOOP=/dev/mapper/${LOOP}p1
 ROOTLOOP=/dev/mapper/${LOOP}p2
 APPSLOOP=/dev/mapper/${LOOP}p3
