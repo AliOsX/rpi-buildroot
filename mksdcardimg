@@ -10,51 +10,55 @@ DD=`which dd`
 MOUNT=`which mount`
 UMOUNT=`which umount`
 
-
-${DD} if=/dev/zero of=${IMAGE} bs=1M count=64  > /dev/null
+if [ -d $IMAGE ]; then
+	rm ${IMAGE}
+fi
+${DD} if=/dev/zero of=${IMAGE} bs=96M count=1 > /dev/null 2>&1
 
 # partition image
-${FDISK} ${IMAGE} <<END
-o
-n
-p
-1
-
-+32M
-n
-p
-2
-
-
-t
-1
-e
-a
-1
-w
+${FDISK} ${IMAGE} > /dev/null 2>&1 <<-"END" 
+	o
+	n
+	p
+	1
+	
+	+32M
+	n
+	p
+	2
+	
+	
+	t
+	1
+	e
+	a
+	1
+	w
 END
 
-kpartx -a ${IMAGE} > /dev/null
-BOOTLOOP=/dev/mapper/`kpartx -al sdimg.img | awk 'NR==1 {print $1}'`
-ROOTLOOP=/dev/mapper/`kpartx -al sdimg.img | awk 'NR==2 {print $1}'`
+sudo ${KPARTX} -a ${IMAGE}
+LOOP=`sudo ${KPARTX} -al ${IMAGE} | awk 'NR==1 {print substr($1,0,5)}'`
+BOOTLOOP=/dev/mapper/${LOOP}p1
+ROOTLOOP=/dev/mapper/${LOOP}p2
 
-echo "Bootloop: ${BOOTLOOP}"
-echo "Rootloop: ${ROOTLOOP}"
+# echo "Bootloop: ${BOOTLOOP}"
+# echo "Rootloop: ${ROOTLOOP}"
+if [ -d 'sdimage' ]; then
+	sudo rm -Rf sdimage
+fi
 mkdir sdimage
-mkdir sdimage/root
-mkdir sdimage/boot
-mkfs.vfat -F16 -n BOOT ${BOOTLOOP} > /dev/null
-mkfs.ext4 ${ROOTLOOP} > /dev/null
+mkdir -p sdimage/root
+mkdir -p sdimage/boot
+sudo ${MKFS_VFAT} -F16 -n BOOT -S 512 ${BOOTLOOP} > /dev/null 2>&1
+sudo ${MKFS_EXT4} ${ROOTLOOP} > /dev/null 2>&1
 
-mount -t vfat -o rw ${BOOTLOOP} sdimage/boot > /dev/null
-mount -t ext4 -o rw ${ROOTLOOP} sdimage/root > /dev/null
+sudo ${MOUNT} -t vfat -w ${BOOTLOOP} sdimage/boot
+sudo ${MOUNT} -t ext4 -w ${ROOTLOOP} sdimage/root
 
-cp output/images/boot/* sdimage/boot/
-cd sdimage/root
-tar xf ../../output/images/rootfs.tar
-cd ../..
-sync && sync
-umount sdimage/boot
-umount sdimage/root
-sudo kpartx -d ${BOOTLOOP}
-sudo kpartx -d ${ROOTLOOP}
+sudo ${CP} output/images/boot/* sdimage/boot/ > /dev/null 2>&1
+sudo ${TAR} xvpsf output/images/rootfs.tar -C sdimage/root > /dev/null 2>&1
+sync && sync > /dev/null 2>&1
+sudo ${UMOUNT} sdimage/boot
+sudo ${UMOUNT} sdimage/root
+sudo ${KPARTX} -d ${IMAGE} > /dev/null 2>&1
+echo "Complete!"
