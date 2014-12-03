@@ -1,0 +1,4 @@
+config BR2_PACKAGE_OTTOSDK
+	bool "Otto SDK"
+	help
+	  Hardware Test For Stak
