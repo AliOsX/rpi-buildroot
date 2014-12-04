@@ -5,21 +5,21 @@
 #############################################################
 
 OTTOSDK_VERSION = 0.1
-OTTOSDK_SITE = $(TOPDIR)/package/stak/ottosdk
-OTTOSDK_SITE_METHOD = file
+OTTOSDK_SITE = file://$(TOPDIR)/package/stak/ottosdk
 OTTOSDK_SOURCE = ottosdk.tar.gz
 OTTOSDK_LICENSE = MIT
-OTTOSDK_INSTALL_STAGING = YES
-OTTOSDK_INSTALL_TARGET = YES
+OTTOSDK_LICENSE_FILES = LICENCE
 
 define OTTOSDK_BUILD_CMDS
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)
+    $(MAKE) -C $(@D) all #CC="$(TARGET_CC)" LD="$(TARGET_LD)" -C $(@D) all
+endef
+
+define OTTOSDK_INSTALL_STAGING_CMDS
+    $(INSTALL) -D -m 0755 $(@D)/stak-test $(STAGING_DIR)/usr/bin/stak-test
 endef
 
 define OTTOSDK_INSTALL_TARGET_CMDS
-	$(INSTALL) -m 0644 $(@D)/stak-test $(TARGET_DIR)/usr/bin/stak-test
-	#$(TARGET_MAKE_ENV) $(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D) install
-	#$(INSTALL) -D -m 755 $(@D)/ $(TARGET_DIR)/usr/sbin/fbset
+    $(INSTALL) -D -m 0755 $(@D)/stak-test $(TARGET_DIR)/usr/bin
 endef
 
 $(eval $(generic-package))

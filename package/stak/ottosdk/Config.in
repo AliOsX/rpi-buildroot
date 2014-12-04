@@ -1,4 +1,5 @@
 config BR2_PACKAGE_OTTOSDK
-	bool "Otto SDK"
+	bool "ottosdk"
+	depends on BR2_arm
 	help
 	  Hardware Test For Stak
