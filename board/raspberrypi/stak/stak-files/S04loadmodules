@@ -1,0 +1,8 @@
+modprobe spi-bcm2708
+modprobe i2c-bcm2708
+modprobe i2c-dev
+modprobe snd_soc_core
+modprobe snd_timer
+modprobe snd_compress
+modprobe snd_soc_bcm2708_i2s
+modprobe snd_pcm
