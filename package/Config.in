@@ -1206,4 +1206,6 @@ endmenu
 # Raspberry Pi specific
 source "package/raspberrypi/Config.in"
 
+# Stak
+source "package/stak/Config.in"
 endmenu
