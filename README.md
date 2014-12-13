@@ -11,7 +11,7 @@ Building
 	cd rpi-buildroot
 	make stak_raspi_hwtest_defconfig
 	make nconfig         # if you want to add packages or fiddle around with it
-			     # the Stak packages currently need to be enabled or they won't get included
+	                     # the Stak packages currently need to be enabled or they won't get included
 	make                 # build (NOTICE: Don't use the **-j** switch, it's set to auto-detect)
 
 
