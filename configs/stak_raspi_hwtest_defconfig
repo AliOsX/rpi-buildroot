@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Buildroot 2014.08-g5b58f6f-dirty Configuration
+# Buildroot 2014.08-g97ad79f Configuration
 #
 BR2_HAVE_DOT_CONFIG=y
 
@@ -255,7 +255,7 @@ BR2_ROOTFS_SKELETON_CUSTOM_PATH="board/raspberrypi/skeleton"
 BR2_ROOTFS_USERS_TABLES=""
 BR2_ROOTFS_OVERLAY=""
 BR2_ROOTFS_POST_BUILD_SCRIPT="board/raspberrypi/postscript.sh"
-BR2_ROOTFS_POST_IMAGE_SCRIPT=""
+BR2_ROOTFS_POST_IMAGE_SCRIPT="board/raspberrypi/stak/mksdcardimg"
 BR2_ROOTFS_POST_SCRIPT_ARGS=""
 
 #
@@ -1309,7 +1309,6 @@ BR2_PACKAGE_OTTOSDK=y
 # Libraries
 #
 BR2_PACKAGE_LIBBCM2835=y
-# BR2_PACKAGE_ARMMEM is not set
 
 #
 # Filesystem images

@@ -14,16 +14,10 @@ Building
 	make                 # build (NOTICE: Don't use the **-j** switch, it's set to auto-detect)
 
 
-Add Startup Scripts to the System
----------------------------------
-Startup scripts/apps belong in the {buildroot}/stak-files/modes directory and will get copied
-to the sd card image in the next step.
-
-
-
 Create SD Card IMG
 ------------------
-	sudo ./mksdcardimg
+	SD card image is created automagically as part of the build process. You can find the result
+        at output/images/rpi-sdimg.img
 
 
 
