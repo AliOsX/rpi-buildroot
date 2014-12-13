@@ -255,7 +255,7 @@ BR2_ROOTFS_SKELETON_CUSTOM_PATH="board/raspberrypi/skeleton"
 BR2_ROOTFS_USERS_TABLES=""
 BR2_ROOTFS_OVERLAY=""
 BR2_ROOTFS_POST_BUILD_SCRIPT="board/raspberrypi/postscript.sh"
-BR2_ROOTFS_POST_IMAGE_SCRIPT=""
+BR2_ROOTFS_POST_IMAGE_SCRIPT="board/raspberrypi/stak/mksdcardimg"
 BR2_ROOTFS_POST_SCRIPT_ARGS=""
 
 #
