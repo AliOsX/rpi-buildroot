@@ -1,0 +1,6 @@
+config BR2_PACKAGE_ONION
+	bool "onion"
+	depends on BR2_arm
+	help
+	  Onion is a lightweight C library to create simple HTTP servers and Web Applications.
+

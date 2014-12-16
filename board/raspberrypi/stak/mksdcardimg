@@ -10,6 +10,7 @@ CP=`which cp`
 DD=`which dd`
 MOUNT=`which mount`
 UMOUNT=`which umount`
+SIZE=128M
 
 if [ -d $IMAGE ]; then
 	rm ${IMAGE}
@@ -19,7 +20,7 @@ if [ -d ${IMAGE}.bz2 ]; then
 	rm -f ${IMAGE}.bz2
 fi
 
-${DD} if=/dev/zero of=${IMAGE} bs=256M count=1 > /dev/null 2>&1
+${DD} if=/dev/zero of=${IMAGE} bs=${SIZE} count=1 > /dev/null 2>&1
 
 # partition image
 ${FDISK} ${IMAGE} > /dev/null 2>&1 <<-"END" 
@@ -33,7 +34,7 @@ ${FDISK} ${IMAGE} > /dev/null 2>&1 <<-"END"
 	p
 	2
 	
-	+128M
+	+64M
 	n
 	p
 	3
@@ -75,13 +76,13 @@ sudo ${TAR} xvpsf output/images/rootfs.tar -C sdimage/root > /dev/null 2>&1
 
 # modify root file system here
 
-echo "/dev/mmcblk0p3		/modes	       ext4    defaults	  0	 0" >> sdimage/root/etc/fstab
-install -m 775 ${STAK_SUPPORT}/stak-files/S05launchscript sdimage/root/etc/init.d
-install -m 775 ${STAK_SUPPORT}/stak-files/S06runtest sdimage/root/etc/init.d
-install -m 775 ${STAK_SUPPORT}/stak-files/S04loadmodules sdimage/root/etc/init.d
-install -m 775 ${STAK_SUPPORT}/stak-files/00-vmcs.conf sdimage/root/etc/ld.so.conf.d/
-install -m 775 ${STAK_SUPPORT}/stak-files/modes/* sdimage/modes/
-install -d sdimage/root/modes
+echo "/dev/mmcblk0p3		/modes	       ext4    defaults	  0	 0" | sudo tee --append sdimage/root/etc/fstab > /dev/null
+sudo install -m 775 ${STAK_SUPPORT}/stak-files/S05launchscript sdimage/root/etc/init.d
+sudo install -m 775 ${STAK_SUPPORT}/stak-files/S06runtest sdimage/root/etc/init.d
+sudo install -m 775 ${STAK_SUPPORT}/stak-files/S04loadmodules sdimage/root/etc/init.d
+sudo install -m 775 ${STAK_SUPPORT}/stak-files/00-vmcs.conf sdimage/root/etc/ld.so.conf.d/
+sudo install -m 775 ${STAK_SUPPORT}/stak-files/modes/* sdimage/modes/
+sudo install -d sdimage/root/modes
 
 if [ -f sdimage/root/sbin/init ];
 then
@@ -97,4 +98,9 @@ sudo ${UMOUNT} sdimage/modes
 sudo ${KPARTX} -d ${IMAGE} > /dev/null 2>&1
 sudo rm -Rf sdimage/
 # bzip2 ${IMAGE}
+
+echo "Uploading to S3"
+
+UPLOADNAME=stak-nightly-`date '+%Y-%m-%d-%s'`.img
+s3cmd put --no-guess-mime-type --disable-multipart ${IMAGE} s3://stak-builds/nightlies/${UPLOADNAME}
 echo "Complete!"

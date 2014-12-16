@@ -4,6 +4,12 @@ menu "Stak"
 
 	menu "Libraries"
 		source package/stak/platform/raspberrypi/libbcm2835/Config.in
+		source package/stak/platform/raspberrypi/armmem/Config.in
+		source package/stak/platform/raspberrypi/nanovg/Config.in
+		source package/stak/platform/raspberrypi/onion/Config.in
+		source package/stak/platform/raspberrypi/bx/Config.in
+		source package/stak/platform/raspberrypi/bgfx/Config.in
+		source package/stak/platform/rtl81xx/Config.in
 	endmenu
 endmenu
 
