@@ -1208,4 +1208,5 @@ source "package/raspberrypi/Config.in"
 
 # Stak
 source "package/stak/Config.in"
+source "package/hostapd-rtl8192cu/Config.in"
 endmenu
