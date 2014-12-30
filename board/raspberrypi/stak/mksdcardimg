@@ -10,7 +10,7 @@ CP=`which cp`
 DD=`which dd`
 MOUNT=`which mount`
 UMOUNT=`which umount`
-SIZE=128M
+SIZE=256M
 
 if [ -d $IMAGE ]; then
 	rm ${IMAGE}
@@ -34,11 +34,7 @@ ${FDISK} ${IMAGE} > /dev/null 2>&1 <<-"END"
 	p
 	2
 	
-	+64M
-	n
-	p
-	3
-
+	+128M
 
 	t
 	1
@@ -47,29 +43,34 @@ ${FDISK} ${IMAGE} > /dev/null 2>&1 <<-"END"
 	1
 	w
 END
+#	
+#	+64M
+#	n
+#	p
+#	3
 
 sudo ${KPARTX} -a ${IMAGE}
 LOOP=`sudo ${KPARTX} -al ${IMAGE} | awk 'NR==1 {print substr($1,1,5)}'`
 BOOTLOOP=/dev/mapper/${LOOP}p1
 ROOTLOOP=/dev/mapper/${LOOP}p2
-APPSLOOP=/dev/mapper/${LOOP}p3
+#APPSLOOP=/dev/mapper/${LOOP}p3
 
-# echo "Bootloop: ${BOOTLOOP}"
-# echo "Rootloop: ${ROOTLOOP}"
+echo "Bootloop: ${BOOTLOOP}"
+echo "Rootloop: ${ROOTLOOP}"
 if [ -d 'sdimage' ]; then
 	sudo rm -Rf sdimage
 fi
 mkdir sdimage
 mkdir -p sdimage/root
 mkdir -p sdimage/boot
-mkdir -p sdimage/modes
+# mkdir -p sdimage/modes
 sudo ${MKFS_VFAT} -F16 -n BOOT -S 512 ${BOOTLOOP} > /dev/null 2>&1
-sudo ${MKFS_EXT4} ${ROOTLOOP} > /dev/null 2>&1
-sudo ${MKFS_EXT4} ${APPSLOOP} > /dev/null 2>&1
+sudo ${MKFS_EXT4} -b 1024 ${ROOTLOOP} > /dev/null 2>&1
+# sudo ${MKFS_EXT4} ${APPSLOOP} > /dev/null 2>&1
 
 sudo ${MOUNT} -t vfat -w ${BOOTLOOP} sdimage/boot
 sudo ${MOUNT} -t ext4 -w ${ROOTLOOP} sdimage/root
-sudo ${MOUNT} -t ext4 -w ${APPSLOOP} sdimage/modes
+# sudo ${MOUNT} -t ext4 -w ${APPSLOOP} sdimage/modes
 
 sudo ${CP} output/images/boot/* sdimage/boot/ > /dev/null 2>&1
 sudo ${TAR} xvpsf output/images/rootfs.tar -C sdimage/root > /dev/null 2>&1
@@ -77,12 +78,15 @@ sudo ${TAR} xvpsf output/images/rootfs.tar -C sdimage/root > /dev/null 2>&1
 # modify root file system here
 
 echo "/dev/mmcblk0p3		/modes	       ext4    defaults	  0	 0" | sudo tee --append sdimage/root/etc/fstab > /dev/null
-sudo install -m 775 ${STAK_SUPPORT}/stak-files/S05launchscript sdimage/root/etc/init.d
-sudo install -m 775 ${STAK_SUPPORT}/stak-files/S06runtest sdimage/root/etc/init.d
+# sudo install -m 775 ${STAK_SUPPORT}/stak-files/S05launchscript sdimage/root/etc/init.d
+# sudo install -m 775 ${STAK_SUPPORT}/stak-files/S06runtest sdimage/root/etc/init.d
+sudo install -m 775 ${STAK_SUPPORT}/stak-files/S06dhcp sdimage/root/etc/init.d
 sudo install -m 775 ${STAK_SUPPORT}/stak-files/S04loadmodules sdimage/root/etc/init.d
 sudo install -m 775 ${STAK_SUPPORT}/stak-files/00-vmcs.conf sdimage/root/etc/ld.so.conf.d/
-sudo install -m 775 ${STAK_SUPPORT}/stak-files/modes/* sdimage/modes/
-sudo install -d sdimage/root/modes
+# sudo install -m 775 ${STAK_SUPPORT}/stak-files/modes/* sdimage/modes/
+# sudo install -d sdimage/root/modes
+CRYPTEDPASS=$(perl -e 'print crypt("doge1234","salt")')
+sudo sed -i -e "s#^root:[^:]*:#root:$CRYPTEDPASS:#" sdimage/root/etc/shadow
 
 if [ -f sdimage/root/sbin/init ];
 then
@@ -94,7 +98,7 @@ fi
 sync && sync > /dev/null 2>&1
 sudo ${UMOUNT} sdimage/boot
 sudo ${UMOUNT} sdimage/root
-sudo ${UMOUNT} sdimage/modes
+# sudo ${UMOUNT} sdimage/modes
 sudo ${KPARTX} -d ${IMAGE} > /dev/null 2>&1
 sudo rm -Rf sdimage/
 # bzip2 ${IMAGE}
@@ -102,5 +106,5 @@ sudo rm -Rf sdimage/
 echo "Uploading to S3"
 
 UPLOADNAME=stak-nightly-`date '+%Y-%m-%d-%s'`.img
-s3cmd put --no-guess-mime-type --disable-multipart ${IMAGE} s3://stak-builds/nightlies/${UPLOADNAME}
+s3cmd put --no-guess-mime-type --disable-multipart ${IMAGE} s3://stak-images/nightlies/${UPLOADNAME}
 echo "Complete!"

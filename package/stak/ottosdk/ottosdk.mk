@@ -4,8 +4,10 @@
 #
 #############################################################
 
-OTTOSDK_VERSION = 3ee96d3fec
-OTTOSDK_SITE = $(call github,NextThingCo,otto-sdk,$(OTTOSDK_VERSION))
+OTTOSDK_VERSION = master
+# OTTOSDK_SITE = $(call github,NextThingCo,otto-sdk,$(OTTOSDK_VERSION))
+OTTOSDK_SITE = file://$(TOPDIR)/package/stak/ottosdk
+OTTOSDK_SOURCE = otto-sdk-$(OTTOSDK_VERSION).tar.gz
 OTTOSDK_LICENSE = MIT
 OTTOSDK_LICENSE_FILES = LICENCE
 OTTOSDK_DEPENDENCIES = libbcm2835
@@ -16,8 +18,6 @@ TARGET_ENV = \
     INCLUDES="-I$(STAGING_DIR)/usr/include -I$(STAGING_DIR)/opt/vc/include -I$(STAGING_DIR)/usr/include -I$(STAGING_DIR)/opt/vc/include/interface/vcos/pthreads"
 
 define OTTOSDK_BUILD_CMDS
-	echo "Building"
-	echo $(CC)
     $(TARGET_ENV) $(MAKE)  -C $(@D) all
 endef
 

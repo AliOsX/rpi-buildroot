@@ -10,10 +10,6 @@ ifeq ($(BR2_PACKAGE_NANOVG),y)
 	include package/stak/platform/raspberrypi/nanovg/nanovg.mk
 endif
 
-ifeq ($(BR2_PACKAGE_ONION),y)
-	include package/stak/platform/raspberrypi/onion/onion.mk
-endif
-
 ifeq ($(BR2_PACKAGE_BX),y)
 	include package/stak/platform/raspberrypi/bx/bx.mk
 endif

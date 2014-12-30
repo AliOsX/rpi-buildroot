@@ -5,10 +5,7 @@
 
 case "$1" in
   start)
-	echo -n "Starting modes: "
-	exec /modes/*
-	# start-stop-daemon -b -S -q -m -p /var/run/syslogd.pid --exec /sbin/syslogd -- -n
-	# start-stop-daemon -b -S -q -m -p /var/run/klogd.pid --exec /sbin/klogd -- -n
+	exec dhcpcd
 	echo "OK"
 	;;
   stop)
