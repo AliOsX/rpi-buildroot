@@ -80,9 +80,11 @@ sudo ${TAR} xvpsf output/images/rootfs.tar -C sdimage/root > /dev/null 2>&1
 echo "/dev/mmcblk0p3		/modes	       ext4    defaults	  0	 0" | sudo tee --append sdimage/root/etc/fstab > /dev/null
 # sudo install -m 775 ${STAK_SUPPORT}/stak-files/S05launchscript sdimage/root/etc/init.d
 # sudo install -m 775 ${STAK_SUPPORT}/stak-files/S06runtest sdimage/root/etc/init.d
-sudo install -m 775 ${STAK_SUPPORT}/stak-files/S06dhcp sdimage/root/etc/init.d
-sudo install -m 775 ${STAK_SUPPORT}/stak-files/S04loadmodules sdimage/root/etc/init.d
+sudo install -m 775 ${STAK_SUPPORT}/stak-files/S02setupmdev sdimage/root/etc/init.d
+sudo install -m 775 ${STAK_SUPPORT}/stak-files/S03loadmodules sdimage/root/etc/init.d
+sudo install -m 775 ${STAK_SUPPORT}/stak-files/S07dhcp sdimage/root/etc/init.d
 sudo install -m 775 ${STAK_SUPPORT}/stak-files/00-vmcs.conf sdimage/root/etc/ld.so.conf.d/
+sudo install -m 775 ${STAK_SUPPORT}/stak-files/dt-blob.bin sdimage/boot/
 # sudo install -m 775 ${STAK_SUPPORT}/stak-files/modes/* sdimage/modes/
 # sudo install -d sdimage/root/modes
 CRYPTEDPASS=$(perl -e 'print crypt("doge1234","salt")')
